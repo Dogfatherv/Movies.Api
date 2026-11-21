@@ -8,9 +8,7 @@
         public int ReleaseYear { get; set; }
         public decimal Rating { get; set; }
         public string Genre { get; set; } = string.Empty;
-        public string? PosterUrl { get; set; }
         public int DurationMinutes { get; set; }
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 

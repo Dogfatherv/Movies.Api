@@ -11,7 +11,7 @@ namespace Movies.Api.Models
         public string Title { get; set; } = string.Empty;
         [StringLength(250)]
         public string? Description { get; set; } = string.Empty;
-        [Range(1888, 2023)]
+        [Range(1888, 2026)]
         public int ReleaseYear { get; set; }
 
         [Range(1, 10)]
@@ -20,7 +20,9 @@ namespace Movies.Api.Models
         [Required]
         [StringLength(100)]
         public string Genre { get; set; } = string.Empty;
-        public string? PosterUrl { get; set; }
+
+        [StringLength(150)]
+        public int? DurationMinutes { get; set; }
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

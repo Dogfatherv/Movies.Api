@@ -1,8 +1,7 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Movies.Api.Data;
-using Movies.Api.Models;
+using Movies.Api.Services;
 using Movies.Api.DTOs;
 
 namespace Movies.Api.Controllers
@@ -11,24 +10,36 @@ namespace Movies.Api.Controllers
     [ApiController]
     public class MoviesController : ControllerBase
     {
-        private readonly Data.MovieDbContext _context;
-        public MoviesController(Data.MovieDbContext context)
+        private readonly IMovieService _movieService;
+        public MoviesController(IMovieService movieService)
         {
-            _context = context;
+            _movieService = movieService;
         }
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Models.Movie>>> GetMovies()
+        public async Task<ActionResult<PagedResultDto<MovieResponseDto>>> GetMovies(
+            [FromQuery] string? search,
+            [FromQuery] string? genre,
+            [FromQuery] string? sortBy,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10
+            )
         {
-            var movies = await _context.Movies.ToListAsync();
+            var movies = await _movieService.GetAllAsync(
+                search,
+                genre,
+                sortBy,
+                pageNumber,
+                pageSize
+                );
             return Ok(movies);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Models.Movie>> GetMovie(int id)
+        public async Task<ActionResult<MovieResponseDto?>> GetMovie(int id)
         {
-            var movie = await _context.Movies.FindAsync(id);
+            var movie = await _movieService.GetByIdAsync(id);
             if (movie == null)
             {
                 return NotFound("Movie not found.");
@@ -37,39 +48,42 @@ namespace Movies.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Models.Movie>> CreateMovie(Models.Movie movie)
+        public async Task<ActionResult<MovieResponseDto>> CreateMovie(CreateMovieDto dto)
         {
-            _context.Movies.Add(movie);
-            await _context.SaveChangesAsync();
+            var movie = await _movieService.CreateAsync(dto);
             return CreatedAtAction("GetMovie", new { id = movie.Id }, movie);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Models.Movie>> UpdateMovie(int id, Models.Movie movie)
+        public async Task<ActionResult<MovieResponseDto>> UpdateMovie(int id, MovieUpdateDto dto)
         {
-            if (id != movie.Id)
+            var updated = await _movieService.UpdateAsync(id, dto);
+            if (!updated)
             {
-                return BadRequest("ID mismatch.");
+                return NotFound("Movie not found.");
             }
+            return NoContent();
 
-            _context.Entry(movie).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return Ok(movie);
+            
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult<Models.Movie>> DeleteMovie(int id)
         {
-            var movie = await _context.Movies.FindAsync(id);
-            if (movie == null)
+            var deleted = await _movieService.DeleteAsync(id);
+            if (!deleted)
             {
                 return NotFound("Movie not found.");
             }
-
-            _context.Movies.Remove(movie);
-            await _context.SaveChangesAsync();
-            return Ok(NoContent());
+            return NoContent();
         }
 
     }
 }
+
+              
+            
+        
+
+   
+

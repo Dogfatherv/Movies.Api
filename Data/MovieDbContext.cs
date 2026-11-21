@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
+using Movies.Api.Models;
 
 namespace Movies.Api.Data
 {
@@ -7,11 +9,14 @@ namespace Movies.Api.Data
         public MovieDbContext(DbContextOptions<MovieDbContext> options)
             : base (options)
         {
+            
             // Initialize the database context
         }
-        public DbSet<Models.Movie> Movies
+        public DbSet<Movie> Movies
         {
             get; set;
         }
+
+        public DbSet<User> Users { get; set; }
     }
 }
